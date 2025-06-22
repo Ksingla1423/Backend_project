@@ -8,5 +8,9 @@
     "dev": "nodemon index.js"
   },
   "author": "Keshav Singla",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3"
+  }
 }
