@@ -11,7 +11,7 @@ app.use(cors(
     }
 ))
 // This middleware is used to parse the incoming request with urlencoded payloads
-app.use(express.urlencoded({extended:true,limit:"10kb"}));
+app.use(express.urlencoded({extended:true,limit:"16kb"}));
 
 // This middleware is used to serve static files from the public directory
 // It allows the server to serve files like images, CSS, and JavaScript from the 'public' directory

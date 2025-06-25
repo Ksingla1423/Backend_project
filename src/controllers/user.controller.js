@@ -20,28 +20,35 @@ const registerUser= asyncHandler(async (req,res)=>{
     const {username,email,password,fullname}=req.body; // contains user details from frontend
     // Example: { username: 'john_doe', email: '}
 
-    console.log("email :",email);
-
-    if( [username,email,fullname,password].some((field)=>field?.trim()=== "") ) {
-        throw new ApiError(400,"All fields are required");
+    // console.log("email :",email);
+ if (
+        [fullname, email, username, password].some((field) => field?.trim() === "")
+    ) {
+        throw new ApiError(400, "All fields are required")
     }
 
-    const existedUser=userModel.findOne({$or:[{username},{email}]})
+    const existedUser=await userModel.findOne({$or:[{username},{email}]})
 
     if(existedUser){
         throw new ApiError(409,"User already exists with this username or email")
     }
 
 // we have used multer as a middle ware which gives additional methold .files for req we are then checking optionally ternary perator if file exist and if avatar first property exist which returns a object and if we do .path we can get the path that multer used
-    const avatarLocalPath=req.files?.avatar[0]?.path;
-    const converImageLocalPath=req.files?.converImage[0]?.path;
 
+    
+    const avatarLocalPath=req.files?.avatar[0]?.path;
+  let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
+    
+    
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar is required");
     }
 
     const avatar=await uploadOnCloudinary(avatarLocalPath);
-    const coverImage= converImageLocalPath ? await uploadOnCloudinary(converImageLocalPath) : undefined;
+    const coverImage= coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : undefined;
 
 
     if(!avatar){
@@ -63,6 +70,7 @@ const registerUser= asyncHandler(async (req,res)=>{
         "-password -refreshToken"
     )
 
+// console.log(req.files);
 
     if(!createdUser){
         throw new ApiError(500,"User creation failed");

@@ -1,45 +1,31 @@
-// user->local server path -> cloudinary 
-import { v2 as cloudinary } from 'cloudinary';
-import fs from 'fs';
+import {v2 as cloudinary} from "cloudinary"
+import fs from "fs"
 
 
-(async function() {
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET 
+});
 
-    // Configuration
-    cloudinary.config({ 
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-        api_key: process.env.CLOUDINARY_API_KEY, 
-        api_secret: process.env.CLOUDINARY_API_SECRET
-    });
-})
-
-const uploadOnClouidnary = async (localFilePath)=>{
+const uploadOnCloudinary = async (localFilePath) => {
     try {
-        if(!localFilePath) return "could not find the file";
-        const result= await cloudinary.uploader.upload(localFilePath,{
-            resource_type: 'auto',
+        if (!localFilePath) return null
+        //upload the file on cloudinary
+        const response = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "auto"
         })
-        // files has been uploaded succesfuly
-    console.log("file uploaded on cloudinary",result.url);
-    return result;  
-    
+        // file has been uploaded successfull
+        //console.log("file is uploaded on cloudinary ", response.url);
+        fs.unlinkSync(localFilePath)
+        return response;
+
     } catch (error) {
-        fs.unlinkSync(localFilePath); // delete the file from local server
+        fs.unlinkSync(localFilePath) // remove the locally saved temporary file as the upload operation got failed
         return null;
-        
     }
 }
 
 
-export { uploadOnClouidnary };
 
-
-    // const uploadResult = await cloudinary.uploader
-    //     .upload(
-    //         'https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg', {
-    //             public_id: 'shoes',
-    //         }
-    //     )
-    //     .catch((error) => {
-    //         console.log(error);
-    //     });
+export {uploadOnCloudinary}
