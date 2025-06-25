@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 const userSchema = new Schema(
   {
     username: {
@@ -49,13 +49,14 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.pre("save", {});
+// userSchema.pre("save", {});
 // algo takes times that wise async and encruption before save
-userSchema("save", async function (next) {
-    if (!this.isModifies("password")) return next();
-    this.password = bcrypt.hash(this.password, 10);
-    next();
-});
+userSchema.pre("save", async function (next) {
+    if(!this.isModified("password")) return next();
+
+    this.password = await bcrypt.hash(this.password, 10)
+    next()
+})
 
 userSchema.methods.isPasswordCorrect = async function (pass) {
     return await bcrypt.compare(pass, this.password);
