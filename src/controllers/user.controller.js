@@ -3,6 +3,7 @@ import {ApiError} from '../utils/apiError.js';
 import { userModel } from '../models/user.model.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import {ApiResponse} from '../utils/apiResponse.js';
+import jwt from 'jsonwebtoken';
 
 const generateTokens=async (userId)=>{
     try {
@@ -32,7 +33,7 @@ const registerUser= asyncHandler(async (req,res)=>{
     // return response to frontend else error
 
 
-    const {username,email,password,fullname}=req.body; // contains user details from frontend
+    const {username,email,password}=req.body; // contains user details from frontend
     // Example: { username: 'john_doe', email: '}
 
     // console.log("email :",email);
@@ -61,14 +62,17 @@ const registerUser= asyncHandler(async (req,res)=>{
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar is required");
     }
+console.log("1");
 
     const avatar=await uploadOnCloudinary(avatarLocalPath);
     const coverImage= coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : undefined;
 
+console.log("2");
 
     if(!avatar){
         throw new ApiError(400,"Avatar upload failed");
     }
+console.log("3");
 
 
     const user=await userModel.create({
@@ -80,6 +84,7 @@ const registerUser= asyncHandler(async (req,res)=>{
         password,
 
     })
+console.log("4");
 
     const createdUser= await userModel.findById(user._id).select(
         "-password -refreshToken"
@@ -111,9 +116,9 @@ const loginUser= asyncHandler(async(req,res)=>{
     // 7-> return response to frontend with user details and access token and refresh token
     // 8-> send cookie
 
-    const {username,email,password}= req.body
+    const {username,email,password}= req.body;
 
-    if(!username || !email){
+    if(!username && !email){
         throw new ApiError(400, "Username and email are required")
     }
 
@@ -196,4 +201,49 @@ const logOutUser= asyncHandler(async (req, res) => {
 }); 
 
 
-export { registerUser, loginUser, logOutUser };
+const refreshAccessToken = asyncHandler(async(req,res)=>{
+    const incomingRefreshToken=req.cookie.refreshToken || req.body.refreshToken;
+
+    if(!incomingRefreshToken){
+        throw new ApiError(401, "Refresh token is required");
+    }
+
+
+    try {
+        const decodedToken=jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+    
+        const user=await userModel.findById(decodedToken._id)
+    
+    
+        if(!user || user.refreshToken !== incomingRefreshToken){
+            throw new ApiError(404,"Invalid refresh token");
+        }
+    
+    
+        const options={
+            httpOnly:true,
+            secure:true
+        }
+    
+    
+        const {accessT,refreshT}=await generateTokens(user._id);
+    
+        return res.status(200)
+        .cookie("accessToken",accessT,options)
+        .cookie("refreshToken",refreshT,options)
+        .json(
+            new ApiResponse(200, {
+                accessToken: accessT,
+                refreshToken: refreshT
+            }, "Access token refreshed successfully")
+        )
+    
+    } catch (error) {
+        throw new ApiError(401, error?.message ||"Invalid refresh token");
+    }
+
+})
+
+
+
+export { registerUser, loginUser, logOutUser, refreshAccessToken };
