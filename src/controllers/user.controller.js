@@ -4,6 +4,21 @@ import { userModel } from '../models/user.model.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import {ApiResponse} from '../utils/apiResponse.js';
 
+const generateTokens=async (userId)=>{
+    try {
+        const user= await userModel.findById(userId)
+        const accessT= user.generateAccessToken();
+        const refreshT= user.generateRefreshToken();
+        user.refreshToken=refreshT;
+        await user.save({validateBeforeSave: false}); // we are not validating the user again as we have already validated it while creating the user
+        return {accessT,refreshT}
+    } catch (error) {
+        throw new ApiError(500, "Token generation failed");
+    }
+}
+
+
+
 const registerUser= asyncHandler(async (req,res)=>{
     // user details lenge from frontend(postman)
     // validation of deatils correct 
@@ -37,7 +52,7 @@ const registerUser= asyncHandler(async (req,res)=>{
 
     
     const avatarLocalPath=req.files?.avatar[0]?.path;
-  let coverImageLocalPath;
+    let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
         coverImageLocalPath = req.files.coverImage[0].path
     }
@@ -70,7 +85,7 @@ const registerUser= asyncHandler(async (req,res)=>{
         "-password -refreshToken"
     )
 
-// console.log(req.files);
+// console.log(req.files);`
 
     if(!createdUser){
         throw new ApiError(500,"User creation failed");
@@ -80,12 +95,105 @@ const registerUser= asyncHandler(async (req,res)=>{
     return res.status(201).json(
         new ApiResponse(201, createdUser ,"user registered succesfully",)
     )
-
-
-
-
-    // res.json();
+  // res.json();
     
 })
 
-export { registerUser };
+
+const loginUser= asyncHandler(async(req,res)=>{
+    // TODOS
+    // 1-> get user details from frontend 
+    // 2-> validate user details 
+    // 3-> if user exisist tehn something else display a message signup first
+    // 4-> check for password
+    // 5-> if coorect password provide access token
+    // 6-> if not correct password then throw error
+    // 7-> return response to frontend with user details and access token and refresh token
+    // 8-> send cookie
+
+    const {username,email,password}= req.body
+
+    if(!username || !email){
+        throw new ApiError(400, "Username and email are required")
+    }
+
+    const user=await userModel.findOne({$or:[{username},{email}]})
+
+
+    if(!user){
+        throw new ApiError(404, "User not found, please signup first")
+    }
+
+    const isPasswordValid=await user.isPasswordCorrect(password)
+
+    if(!isPasswordValid){
+        throw new ApiError(401, "Invalid password");
+    }
+
+    const {accessT,refreshT}=await generateTokens(user._id);
+
+
+    const loggedInUser= await userModel.findById(user._id).select( " -password -refreshToken")
+
+
+    const options={
+        httpOnly:true,
+        secure:true
+    }
+
+
+
+    return res
+    .status(200)
+    .cookie("accessToken", accessT, options)
+    .cookie("refreshToken",refreshT,options)
+    .json(
+        new ApiResponse(200,{
+            user: loggedInUser,
+            accessToken: accessT,
+            refreshToken: refreshT
+        }, "User logged in successfully" )
+    )
+
+})
+
+
+const logOutUser= asyncHandler(async (req, res) => {
+    // 1-> get user from req
+    // 2-> remove refresh token from user
+    // 3-> save user
+    // 4-> clear cookies
+    // 5-> return response to frontend
+
+    const user = req.user;
+
+    await userModel.findByIdAndUpdate(
+        user._id,
+        {
+            $set:{
+                refreshToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+
+    const options={
+        httpOnly:true,
+        secure:true
+    }
+
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(
+        new ApiResponse(200, null, "User logged out successfully")
+    )
+}); 
+
+
+export { registerUser, loginUser, logOutUser };

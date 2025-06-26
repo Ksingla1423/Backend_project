@@ -1,6 +1,9 @@
 import express from 'express';
 import  cors  from 'cors';
 import cookieParser from 'cookie-parser';
+import userRouter from './routes/user.routes.js';
+
+
 const app= express();
 
 // use method is udes for whole middleware and configurations
@@ -26,7 +29,6 @@ app.use(express.json({
 
 // route imports
 
-import userRouter from './routes/user.routes.js';
 
 // api/v1/users/register
 app.use("/api/v1/users",userRouter)
