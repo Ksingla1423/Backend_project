@@ -1,5 +1,9 @@
 import mongoose,{ Schema} from 'mongoose';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
+import { videoModel as Video } from "../models/video.model.js";
+import { userModel as User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 // const  = mongoose;
 
 const videoSchema = new Schema({
