@@ -1,9 +1,9 @@
 
 import mongoose, { isValidObjectId } from "mongoose"
 import { Posts } from "../models/posts.model.js"
-import { User } from "../models/user.model.js"
-import { ApiError } from "../utils/AppError.js"
-import ApiResponse from "../utils/ApiResponse.js"
+import { userModel as User } from "../models/user.model.js"
+import { ApiError } from "../utils/apiError.js"
+import {ApiResponse} from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 const createPosts = asyncHandler(async (req, res) => {

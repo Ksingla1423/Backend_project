@@ -2,7 +2,7 @@ import {asyncHandler} from '../utils/asyncHandler.js';
 import {ApiError} from '../utils/apiError.js';
 import { userModel } from '../models/user.model.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
-import {ApiResponse} from '../utils/apiResponse.js';
+import {ApiResponse} from '../utils/ApiResponse.js';
 import jwt from 'jsonwebtoken';
 import mongoose, { set } from 'mongoose';
 
@@ -32,7 +32,7 @@ const registerUser= asyncHandler(async (req,res)=>{
     // return response to frontend else error
 
 
-    const {username,email,password}=req.body; // contains user details from frontend
+    const {username,email,password,fullname}=req.body; // contains user details from frontend
     // Example: { username: 'john_doe', email: '}
 
     // console.log("email :",email);
@@ -56,6 +56,7 @@ const registerUser= asyncHandler(async (req,res)=>{
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
         coverImageLocalPath = req.files.coverImage[0].path
     }
+    // console.log(avatarLocalPath===undefined);
     
     
     if(!avatarLocalPath){
@@ -66,7 +67,7 @@ console.log("1");
     const avatar=await uploadOnCloudinary(avatarLocalPath);
     const coverImage= coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : undefined;
 
-console.log("2");
+// console.log(coverImage);
 
     if(!avatar){
         throw new ApiError(400,"Avatar upload failed");

@@ -3,11 +3,11 @@ import {
     getChannelStats,
     getChannelVideos,
 } from "../controllers/dashboard.controller.js"
-import { VerifyJwt } from '../middlewares/auth.middleware.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = Router()
 
-router.use( VerifyJwt)
+router.use(verifyJWT)
 
 router.route("/stats").get(getChannelStats)
 router.route("/videos").get(getChannelVideos)

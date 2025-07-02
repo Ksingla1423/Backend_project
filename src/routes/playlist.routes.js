@@ -9,11 +9,11 @@ import {
     removeVideoFromPlaylist,
     updatePlaylist,
 } from "../controllers/playlist.controller.js"
-import { VerifyJwt } from '../middlewares/auth.middleware.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.use(VerifyJwt); 
+router.use(verifyJWT);
 router.route("/").post(createPlaylist)
 
 router.route("/user").get(getUserPlaylists);

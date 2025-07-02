@@ -6,19 +6,19 @@ import {
     updateComment,
     getUserComments
 } from "../controllers/comment.controller.js"
-import { VerifyJwt } from '../middlewares/auth.middleware.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 const router = Router();
 
 
 router
     .route("/:videoId")
     .get(getVideoComments).
-    post(VerifyJwt, addComment);
+    post(verifyJWT, addComment);
 
 router
     .route("/c/:commentid")
-    .delete(VerifyJwt,deleteComment)
-    .patch(VerifyJwt, updateComment);
+    .delete(verifyJWT, deleteComment)
+    .patch(verifyJWT, updateComment);
 
 router
     .route("/user/all")

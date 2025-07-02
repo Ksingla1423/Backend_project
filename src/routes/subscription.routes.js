@@ -4,10 +4,10 @@ import {
     getChannelSubscribers,
     getUserSubscriptions,
 } from "../controllers/subscription.controller.js";
-import { VerifyJwt } from '../middlewares/auth.middleware.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = Router();
-router.use(VerifyJwt);
+router.use(verifyJWT);
 
 // Subscribe - Unsubscribe to a channel
 router.post("/:channelId", toggleSubscription);

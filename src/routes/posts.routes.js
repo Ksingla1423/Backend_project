@@ -5,12 +5,12 @@ import {
     updatePosts,
     deletePosts
 } from "../controllers/posts.controller.js"
-import { VerifyJwt } from "../middlewares/auth.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/").post(VerifyJwt,createPosts);
+router.route("/").post(verifyJWT, createPosts);
 router.route("/user/:userId").get(getUserPosts);
-router.route("/:id").patch(VerifyJwt,updatePosts).delete(VerifyJwt,deletePosts);    
+router.route("/:id").patch(verifyJWT, updatePosts).delete(verifyJWT, deletePosts);
 
-export default router   
+export default router;
