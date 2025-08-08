@@ -1,6 +1,6 @@
 # VidVerse
 
-Vibe is a Node.js backend API for a video sharing platform, similar to YouTube. It supports user authentication, video uploads, comments, likes, playlists, subscriptions, and dashboard analytics. The backend is built with Express.js, MongoDB (via Mongoose), and integrates with Cloudinary for media storage.
+VidVerse is a Node.js backend API for a video sharing platform, similar to YouTube. It supports user authentication, video uploads, comments, likes, playlists, subscriptions, and dashboard analytics. The backend is built with Express.js, MongoDB (via Mongoose), and integrates with Cloudinary for media storage.
 
 ---
 
